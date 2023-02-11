@@ -1,9 +1,10 @@
+// If we are in development mode we will require .env file
 if (process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 }
 
 
-
+// All requires
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -15,13 +16,15 @@ const methodOverride = require('method-override');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
-
-
+const mongoSanitize = require('express-mongo-sanitize');
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
+const MongoStore = require('connect-mongo');
+const dbUrl = 'mongodb://127.0.0.1:27017/yelp-camp'
 
-mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp');
+mongoose.connect(dbUrl);
+mongoose.set("strictQuery", false);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -38,8 +41,23 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(mongoSanitize({
+    replaceWith: '_'
+}))
+
+const store = MongoStore.create({
+	mongoUrl: dbUrl,
+	secret: "thisWillBeABetterSecret",
+	touchAfter: 24 * 60 * 60,
+});
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+})
 
 const sessionConfig = {
+    store,
+    name: "session",
     secret: 'thisshouldbeabettersecret!',
     resave: false,
     saveUninitialized: true,
