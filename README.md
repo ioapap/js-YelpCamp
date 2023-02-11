@@ -1,5 +1,5 @@
 # YelpCamp 🏕️
-### A web-based application that allows users to create, view, and review campgrounds around the world🌎
+### A Yelp-like web-based application that allows users to create, view, and review campgrounds around the world🌎
 
 ## Technologies Used 💻
 - Frontend:
